@@ -1,0 +1,5 @@
+# False Positives - Variable Names Containing "id", "key", "token"
+# These are resource identifiers or parameter names, not actual credentials
+
+# facilitator.py line 72: glacier_object_id is a Glacier archive ID (resource identifier), not an API key
+d15728bbb48b223b24c31013a3068adb05e90f26:source/solution/application/glacier_s3_transfer/facilitator.py:generic-api-key:72
