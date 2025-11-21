@@ -7,7 +7,7 @@ import logging
 import os
 import re
 from base64 import b64decode
-from xml.dom.minidom import parseString
+from defusedxml.minidom import parseString
 
 from pyspark.sql import DataFrame, Window
 from pyspark.sql import functions as F
