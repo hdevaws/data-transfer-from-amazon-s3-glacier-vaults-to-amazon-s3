@@ -211,6 +211,8 @@ class SolutionsStateMachine(StateMachine):
             ],
         )
 
+
+
     def _suppress_cdk_nag(self, logging_state_machine_policy: iam.Policy) -> None:
         NagSuppressions.add_resource_suppressions(
             logging_state_machine_policy,

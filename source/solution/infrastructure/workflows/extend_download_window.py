@@ -18,9 +18,8 @@ from solution.infrastructure.helpers.distributed_map import (
     ResultConfig,
 )
 from solution.infrastructure.helpers.solutions_function import SolutionsPythonFunction
-from solution.infrastructure.helpers.solutions_state_machine import (
-    SolutionsStateMachine,
-)
+from solution.infrastructure.helpers.solutions_state_machine import SolutionsStateMachine
+from solution.infrastructure.helpers.execution_type_patch import patch_map_execution_type
 from solution.infrastructure.output_keys import OutputKeys
 from solution.infrastructure.workflows.stack_info import StackInfo
 
@@ -192,6 +191,7 @@ class Workflow:
             definition=extend_download_window_initiate_job,
             item_reader_config=item_reader_config,
             result_config=result_config,
+            execution_type="STANDARD",
             item_selector={
                 "item.$": "$$.Map.Item.Value",
                 "tier.$": "$.tier",
@@ -201,6 +201,7 @@ class Workflow:
             max_items_per_batch=100,
         )
 
+        # Fixed: DistributedMap mode selection based on ItemReader presence
         step_function_definition = archives_needing_window_extension_lambda_task.next(
             extend_download_window_distributed_map_state
         )
@@ -212,7 +213,7 @@ class Workflow:
             "ExtendDownloadWindowStateMachine",
             stack_info.parameters.enable_step_function_logging_parameter.value_as_string,
             stack_info.parameters.enable_step_function_tracing_parameter.value_as_string,
-            definition=step_function_definition,
+            definition_body=sfn.DefinitionBody.from_chainable(step_function_definition),
         )
 
         stack_info.lambdas.extend_download_window_initiate_retrieval_lambda.grant_invoke(

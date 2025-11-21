@@ -639,7 +639,7 @@ class Workflow:
             "InventoryRetrievalStateMachine",
             stack_info.parameters.enable_step_function_logging_parameter.value_as_string,
             stack_info.parameters.enable_step_function_tracing_parameter.value_as_string,
-            definition=archive_naming_override_job,
+            definition_body=sfn.DefinitionBody.from_chainable(archive_naming_override_job),
         )
 
         stack_info.lambdas.inventory_retrieval_lambda_function.grant_invoke(

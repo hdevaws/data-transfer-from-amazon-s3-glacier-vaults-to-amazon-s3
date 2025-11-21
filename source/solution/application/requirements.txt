@@ -1,0 +1,2 @@
+boto3==1.34.91
+aws-lambda-powertools[aws-sdk]==2.37.0

@@ -361,7 +361,7 @@ class Workflow:
             "CleanupStateMachine",
             stack_info.parameters.enable_step_function_logging_parameter.value_as_string,
             stack_info.parameters.enable_step_function_tracing_parameter.value_as_string,
-            definition=remove_completion_checker_target_state,
+            definition_body=sfn.DefinitionBody.from_chainable(remove_completion_checker_target_state),
         )
 
         executing_sfn_rule_policy = iam.Policy(

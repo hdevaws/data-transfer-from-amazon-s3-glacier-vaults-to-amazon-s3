@@ -16,9 +16,8 @@ from solution.infrastructure.helpers.distributed_map import (
     ResultConfig,
 )
 from solution.infrastructure.helpers.solutions_function import SolutionsPythonFunction
-from solution.infrastructure.helpers.solutions_state_machine import (
-    SolutionsStateMachine,
-)
+from solution.infrastructure.helpers.solutions_state_machine import SolutionsStateMachine
+from solution.infrastructure.helpers.execution_type_patch import patch_map_execution_type
 from solution.infrastructure.output_keys import OutputKeys
 from solution.infrastructure.workflows.stack_info import StackInfo
 
@@ -127,6 +126,7 @@ class Workflow:
             definition=cleanup_archives_status_lambda_task,
             item_reader_config=item_reader_config,
             result_config=result_config,
+            execution_type="STANDARD",
             max_concurrency=10,
             item_selector={
                 "item.$": "$$.Map.Item.Value",
@@ -146,7 +146,7 @@ class Workflow:
             "ArchivesStatusCleanupStateMachine",
             stack_info.parameters.enable_step_function_logging_parameter.value_as_string,
             stack_info.parameters.enable_step_function_tracing_parameter.value_as_string,
-            definition=step_function_definition,
+            definition_body=sfn.DefinitionBody.from_chainable(step_function_definition),
         )
 
         stack_info.lambdas.cleanup_archives_status_lambda.grant_invoke(

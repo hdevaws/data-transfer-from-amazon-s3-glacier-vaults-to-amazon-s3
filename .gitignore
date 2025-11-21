@@ -1,21 +1,77 @@
+# Python
 __pycache__/
 *.py[cod]
-build/
-*.egg-info/
+*.so
 *.egg
-.tox/
-.coverage
-.coverage.*
-.cache
+*.egg-info/
+build/
+dist/
+*.whl
+
+# Virtual environments
 .env
 .venv
 env/
 venv/
-.DS_Store
+.Python
+
+# Testing
+.tox/
+.coverage
+.coverage.*
+.pytest_cache/
+.cache
+
+# CDK
+cdk.out/
+cdk.context.json
+
+# Generated CloudFormation templates
+template.json
+*.template.json
+
+# Office documents (keep markdown only)
+*.docx
+*.pdf
+*.xlsx
+*.pptx
+
+# IDE
+.idea/
+.vscode/
 .mypy_cache/
-.idea
-.vscode
+.dmypy.json
+dmypy.json
+
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.bak
+*.backup
+
+# Node
+node_modules/
+
+# AWS credentials (safety)
+*.pem
+*.key
+credentials
+.aws/
+
+# Deployment artifacts
 open-source/
-cdk.out
 deployment/global-s3-assets
 deployment/regional-s3-assets
+
+# Jupyter
+.ipynb_checkpoints

@@ -54,11 +54,16 @@ def wait_till_state_machine_finish(executionArn: str, timeout: int) -> None:
     client: SFNClient = sfn_client()
     start_time = time.time()
     while (time.time() - start_time) < timeout:
-        time.sleep(1)
+        time.sleep(2)  # Increased sleep time to reduce API calls
         sf_describe_response = client.describe_execution(executionArn=executionArn)
         status = sf_describe_response["status"]
         if status == "RUNNING":
             continue
+        elif status in ["FAILED", "TIMED_OUT", "ABORTED"]:
+            # Log the error for debugging
+            error_msg = sf_describe_response.get("error", "Unknown error")
+            cause = sf_describe_response.get("cause", "Unknown cause")
+            print(f"Step Function execution failed with status {status}: {error_msg} - {cause}")
         break
 
 
