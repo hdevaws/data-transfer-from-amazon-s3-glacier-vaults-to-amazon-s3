@@ -85,7 +85,7 @@ def notify_sns_job_completion(
             "VaultARN": f"arn:{aws_partition}:glacier:{os.environ['AWS_REGION']}:{account_id}:vaults/{vault_name}",
         }
 
-    time.sleep(NOTIFICATION_DELAY_IN_SEC)
+    time.sleep(NOTIFICATION_DELAY_IN_SEC)  # nosemgrep: arbitrary-sleep - intentional delay to simulate Glacier async job completion
 
     client.publish(
         TopicArn=sns_topic,
