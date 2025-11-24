@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [2.0.0] - 2024-11-20
+## [1.1.4] - 2024-11-20
 
 ### BREAKING CHANGES
 
@@ -124,8 +124,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CloudWatch dashboard for monitoring transfer progress
 - Support for multiple AWS regions
 
-[Unreleased]: https://github.com/aws-solutions/data-transfer-from-amazon-s3-glacier-vaults-to-amazon-s3/compare/v2.0.0...HEAD
-[2.0.0]: https://github.com/aws-solutions/data-transfer-from-amazon-s3-glacier-vaults-to-amazon-s3/compare/v1.1.3...v2.0.0
+[Unreleased]: https://github.com/aws-solutions/data-transfer-from-amazon-s3-glacier-vaults-to-amazon-s3/compare/v1.1.4...HEAD
+[1.1.4]: https://github.com/aws-solutions/data-transfer-from-amazon-s3-glacier-vaults-to-amazon-s3/compare/v1.1.3...v1.1.4
 [1.1.3]: https://github.com/aws-solutions/data-transfer-from-amazon-s3-glacier-vaults-to-amazon-s3/compare/v1.1.2...v1.1.3
 [1.1.2]: https://github.com/aws-solutions/data-transfer-from-amazon-s3-glacier-vaults-to-amazon-s3/compare/v1.1.1...v1.1.2
 [1.1.1]: https://github.com/aws-solutions/data-transfer-from-amazon-s3-glacier-vaults-to-amazon-s3/compare/v1.1.0...v1.1.1
