@@ -76,6 +76,11 @@ def test_multipart_upload_cleanup(
 ) -> None:
     """Validate that open multipart uploads are deleted. Ensure that only multipart uploads with the correct key prefix are deleted"""
 
+    # Set AWS_ACCOUNT_ID for the test
+    if "AWS_ACCOUNT_ID" not in os.environ:
+        sts_client = boto3.client("sts")
+        os.environ["AWS_ACCOUNT_ID"] = sts_client.get_caller_identity()["Account"]
+
     cleaner_setup = MultipartCleanup(workflow_run, bucket)
     cleaner_setup.cleanup()
     different_prefix = "different_prefix"

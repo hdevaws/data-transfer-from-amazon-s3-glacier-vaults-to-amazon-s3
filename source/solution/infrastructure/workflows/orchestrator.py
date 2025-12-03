@@ -331,16 +331,18 @@ class Workflow:
             "OrchestratorStateMachine",
             stack_info.parameters.enable_step_function_logging_parameter.value_as_string,
             stack_info.parameters.enable_step_function_tracing_parameter.value_as_string,
-            definition=put_workflow_input_into_ddb.next(
-                archives_status_cleanup_workflow_state
-            )
-            .next(inventory_retrieval_workflow_state)
-            .next(put_extend_download_window_target_state)
-            .next(cloudwatch_dashboard_update_state_machine_target_state)
-            .next(initiate_retrieval_workflow_state)
-            .next(put_completion_checker_target_state)
-            .next(wait_completion)
-            .next(cleanup_workflow_state),
+            definition_body=sfn.DefinitionBody.from_chainable(
+                put_workflow_input_into_ddb.next(
+                    archives_status_cleanup_workflow_state
+                )
+                .next(inventory_retrieval_workflow_state)
+                .next(put_extend_download_window_target_state)
+                .next(cloudwatch_dashboard_update_state_machine_target_state)
+                .next(initiate_retrieval_workflow_state)
+                .next(put_completion_checker_target_state)
+                .next(wait_completion)
+                .next(cleanup_workflow_state)
+            ),
         )
 
         stack_info.tables.async_facilitator_table.grant_read_write_data(

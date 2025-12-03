@@ -3,6 +3,7 @@ Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 SPDX-License-Identifier: Apache-2.0
 """
 
+import json
 from aws_cdk import Aws, CfnElement, CfnOutput, Duration, Stack
 from aws_cdk import aws_iam as iam
 from aws_cdk import aws_lambda as lambda_
@@ -19,9 +20,7 @@ from solution.infrastructure.helpers.distributed_map import (
 )
 from solution.infrastructure.helpers.nested_distributed_map import NestedDistributedMap
 from solution.infrastructure.helpers.solutions_function import SolutionsPythonFunction
-from solution.infrastructure.helpers.solutions_state_machine import (
-    SolutionsStateMachine,
-)
+from solution.infrastructure.helpers.solutions_state_machine import SolutionsStateMachine
 from solution.infrastructure.helpers.task_retry import TaskRetry
 from solution.infrastructure.output_keys import OutputKeys
 from solution.infrastructure.workflows.stack_info import StackInfo
@@ -158,6 +157,7 @@ class Workflow:
             inner_max_concurrency=1,
             max_items_per_batch=100,
             retry=inner_map_retry.custom_state_params(),
+            execution_type="STANDARD",
         )
 
         list_inventory_partitions = tasks.CallAwsService(
@@ -252,12 +252,13 @@ class Workflow:
 
         assert stack_info.parameters.enable_step_function_logging_parameter is not None
         assert stack_info.parameters.enable_step_function_tracing_parameter is not None
+        
         stack_info.state_machines.initiate_retrieval_state_machine = SolutionsStateMachine(
             stack_info.scope,
             "InitiateRetrievalStateMachine",
             stack_info.parameters.enable_step_function_logging_parameter.value_as_string,
             stack_info.parameters.enable_step_function_tracing_parameter.value_as_string,
-            definition=list_inventory_partitions.next(partitions_distributed_map_state),
+            definition_body=sfn.DefinitionBody.from_chainable(list_inventory_partitions.next(partitions_distributed_map_state)),
         )
 
         stack_info.tables.metric_table.grant_read_write_data(

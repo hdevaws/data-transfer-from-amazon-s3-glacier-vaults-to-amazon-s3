@@ -6,6 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 from typing import Optional
 
 from aws_cdk import (
+    Aspects,
     Aws,
     CfnCondition,
     CfnElement,
@@ -73,11 +74,14 @@ class SolutionStack(Stack):
 
         output_bucket_name_context = scope.node.try_get_context("output_bucket_name")
 
+        # v2.0.0: Enhanced asset bundling with optimized exclusions
         _excluded_assets = (
-            ["**/mock_glacier_data.py", "**/__pycache__/**", "tests/**"]
+            ["**/mock_glacier_data.py", "**/__pycache__/**", "tests/**", "cdk.out/**", ".git/**", "**/node_modules/**"]
             if self.skip_integration_tests
-            else ["**/__pycache__/**", "tests/**"]
+            else ["**/__pycache__/**", "tests/**", "cdk.out/**", ".git/**", "**/node_modules/**"]
         )
+        
+        # v2.0.0: Use CDK asset bundling with Python dependency management
         lambda_source = lambda_.Code.from_asset("source", exclude=_excluded_assets)
         # Sonarqube ruleKey: python:S6327
         # This is necessary and SNS has server-side encryption disabled due to Glacier service limitation.
@@ -743,5 +747,6 @@ class SolutionStack(Stack):
         # Creating the System Manager Resources
         allow_cross_region_data_transfer = self.skip_integration_tests == False
         SystemManager(stack_info, allow_cross_region_data_transfer)
+        
         self.outputs = stack_info.outputs
         self.stack_info = stack_info

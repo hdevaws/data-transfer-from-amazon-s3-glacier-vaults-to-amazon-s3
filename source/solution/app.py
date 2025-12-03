@@ -17,20 +17,12 @@ from solution.infrastructure.stack import SolutionStack
 from solution.mocking.mock_glacier_stack import MockGlacierStack
 from solution.pipeline.stack import PipelineStack
 
-dist_output_bucket = os.getenv("DIST_OUTPUT_BUCKET")
-solution_name = os.getenv("SOLUTION_NAME")
-dist_version = os.getenv("VERSION")
-
-if not (dist_output_bucket and solution_name and dist_version):
-    synthesizer = cdk.DefaultStackSynthesizer(
-        generate_bootstrap_version_rule=False,
-    )
-else:
-    synthesizer = cdk.DefaultStackSynthesizer(
-        file_assets_bucket_name=f"{dist_output_bucket}-${{AWS::Region}}",
-        bucket_prefix=f"{solution_name}/{dist_version}/",
-        generate_bootstrap_version_rule=False,
-    )
+# v2.0.0: Migrated from S3 bucket deployments to CDK asset bundling
+# Removed dependency on DIST_OUTPUT_BUCKET environment variables
+# All assets are now bundled locally and deployed via CDK assets
+synthesizer = cdk.DefaultStackSynthesizer(
+    generate_bootstrap_version_rule=False,
+)
 
 
 def _load_cdk_context() -> Any:
@@ -62,3 +54,7 @@ def main() -> None:
     PipelineStack(app, "pipeline")
     MockGlacierStack(app, "mock-glacier")
     app.synth()
+
+
+if __name__ == "__main__":
+    main()

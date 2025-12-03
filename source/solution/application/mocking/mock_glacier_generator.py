@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 import json
 import random
 from datetime import datetime, timedelta
-from importlib import resources
+from importlib_resources import files as resources
 from typing import Any, Callable, Dict, Optional
 from unittest.mock import patch
 

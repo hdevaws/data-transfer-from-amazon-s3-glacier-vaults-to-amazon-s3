@@ -1,4 +1,4 @@
-# Data transfer from Amazon S3 Glacier vaults to Amazon S3
+# Data transfer from Amazon S3 Glacier vaults to Amazon S3 (v1.1.4)
 
 Data transfer from Amazon S3 Glacier vaults to Amazon S3 is a serverless Guidance that automatically copies entire Amazon S3 Glacier vault archives to a defined destination Amazon Simple Storage Service (Amazon S3 bucket) and S3 storage class.
 
@@ -69,6 +69,11 @@ The Guidance can be deployed to your AWS account directly from the source code u
 
 #### Prerequisites
 
+- AWS CLI configured with appropriate credentials
+- CDK bootstrapped in your AWS account: `npx cdk bootstrap`
+- Destination S3 bucket created before deployment
+- Python virtual environment activated
+
 Install prerequisite software packages:
 
 - [AWS Command Line Interface](https://aws.amazon.com/cli/)
@@ -110,26 +115,50 @@ The name of this bucket should be specified via a CloudFormation parameter *Dest
 aws s3 ls
 ```
 
-Bootstrap CDK, if required
+Bootstrap CDK, if required (this creates a CloudFormation stack called CDKToolkit, resources needed to deploy AWS  CDK apps into an environment)
 
 ```
 npx cdk bootstrap
 ```
 
-Deploy the Guidance
+    Optional:  To get your CDK bootstrap bucket
+    
+    aws cloudformation describe-stacks --stack-name CDKToolkit --query "Stacks[0].Outputs[?OutputKey=='BucketName'].OutputValue" --output text`
 
-```
-npx cdk deploy solution --parameters DestinationBucketParameter=my-output-bucket-name
-```
 
-_note: set context parameter `skip_integration_tests` to `false` to indicate if you want to run integration tests against the solution stack: `npx cdk deploy solution -c skip_integration_tests=false --parameters DestinationBucketParameter=my-output-bucket-name`._
+
+   Deploy the Guidance
+   Make sure "solution" is your project name, i.e. "data-transfer-from-amazon-s3-glacier-vaults-to-amazon-s3", and DestinationBucketParameter are your newly created bucket
+
+
+    npx cdk deploy solution --parameters DestinationBucketParameter=my-output-bucket-name
+
+
+NOTE: set context parameter `skip_integration_tests` to `false` to indicate if you want to run integration tests against the solution stack: `npx cdk deploy solution -c skip_integration_tests=false --parameters DestinationBucketParameter=my-output-bucket-name`._
+
+Deployment Issues(try this)
+
+    If there are issues during the deploy steps, it may need a cdk synth step
+
+    Synthesize CDK template
+    Make sure "solution" is your project name, i.e. 
+    
+    "data-transfer-from-amazon-s3-glacier-vaults-to-amazon-s3", and DestinationBucketParameter are your newly created bucket, sample "s3glacier-copies-test"
+
+    npx cdk synth solution --parameters DestinationBucketParameter=s3glacier-copies-test
+
 
 #### 5. Running integration tests
-
 ```
-npx cdk deploy mock-glacier
 export MOCK_SNS_STACK_NAME=mock-glacier # use mock-glacier stack name
 export STACK_NAME=solution # use solution stack name
+
+or
+
+$env:MOCK_SNS_STACK_NAME="mock-glacier"
+$env:STACK_NAME="data-transfer-from-amazon-s3-glacier-vaults-to-amazon-s3"
+
+npx cdk deploy mock-glacier
 tox -e integration
 ```
 
@@ -151,7 +180,7 @@ npx cdk deploy pipeline -c repository_name=my-repo -c branch=dev -c skip_integra
 
 The pipeline will be triggered any time you make a push to the codecommit repository on the identified branch.
 
-_note: due to a known issue where resource name gets truncated, we recommend branch name no longer than 3 characters, while the fix is being worked on._
+NOTE: due to a known issue where resource name gets truncated, we recommend branch name no longer than 30 characters.
 
 ## Project structure
 
@@ -194,9 +223,15 @@ You can uninstall the Data transfer from Amazon S3 Glacier Vaults to Amazon S3 G
 
 Determine whether the AWS Command Line Interface (AWS CLI) is available in your environment. For installation instructions, see What Is the AWS Command Line Interface in the AWS CLI User Guide. After conﬁrming that the AWS CLI is available, run the following command.
 
-```
-$ aws cloudformation delete-stack --stack-name <installation-stack-name>
-```
+
+    $ aws cloudformation delete-stack --stack-name <installation-stack-name>
+
+    or example
+
+    $ aws cloudformation delete-stack --stack-name  data-transfer-from-amazon-s3-glacier-vaults-to-amazon-s3
+
+
+
 ### Deleting the S3 buckets
 
 This Guidance is conﬁgured to retain the guidance-created S3 buckets if you decide to delete the CloudFormation stack, to prevent accidental data loss. After uninstalling the Guidance, you can manually delete the S3 buckets if you don't need to retain the data. Follow these steps to delete the S3 buckets.
@@ -207,6 +242,27 @@ This Guidance is conﬁgured to retain the guidance-created S3 buckets if you de
 4.	Select each S3 bucket and choose Empty.
 5.	Select each S3 bucket and choose Delete.
 
+#### For an automated removal of the s3 buckets in the stack, it is your responsibility to confirm the buckets are not required to keep and to correct stack name is used
+
+    List all S3 buckets for the stack (example deployment name: data-transfer-from-amazon-s3-glacier-vaults-to-amazon-s3)
+
+    aws s3 ls | findstr "data-transfer-from-amazon-s3-glacier-vaults-to-amazon-s3"
+
+
+Empty each bucket (replace BUCKET-NAME with actual bucket names from list above)
+
+    aws s3 rm s3://data-transfer-from-amazon-s3-glacier-vaults-to-amazon-s3-inventorybucket-XXXXX --recursive
+
+
+    aws s3 rm s3://data-transfer-from-amazon-s3-glacier-vaults-to-amazon-s3-bucketaccesslogs-XXXXX --recursive
+
+
+#### Delete each bucket after emptying
+
+    aws s3 rb s3://data-transfer-from-amazon-s3-glacier-vaults-to-amazon-s3-inventorybucket-XXXXX
+
+    aws s3 rb s3://data-transfer-from-amazon-s3-glacier-vaults-to-amazon-s3-bucketaccesslogs-XXXXX
+
 ### Deleting the DynamoDB tables
 
 This Guidance is conﬁgured to retain the guidance-created DynamoDB tables if you decide to delete the CloudFormation stack, to prevent accidental data loss.
@@ -216,17 +272,61 @@ This Guidance is conﬁgured to retain the guidance-created DynamoDB tables if y
 4.	Select each DynamoDB table and choose Delete.
 5.	Conﬁrm the deletion.
 
-## External Contributors
-[@diegokodify](https://github.com/diegokodify) for [#4](https://github.com/aws-solutions/data-transfer-from-amazon-s3-glacier-vaults-to-amazon-s3/pull/4).
 
----
+If your comfortable removing all tables for the deployed solution, cli commands are noted:
+
+    List all DynamoDB tables for the solution
+
+    aws dynamodb list-tables --query "TableNames[?contains(@, 'solution')]" --output table
+
+    or
+
+    an example if using "data-transfer-from-amazon-s3-glacier-vaults-to-amazon-s3" as your deployed name
+
+    aws dynamodb list-tables --query "TableNames[?contains(@, 'data-transfer-from-amazon-s3-glacier-vaults-to-amazon-s3')]" --output table
+
+    then remove all dynamodb tables matching the stack name (powershell)
+
+    aws dynamodb list-tables --query "TableNames[?contains(@, 'data-transfer-from-amazon-s3-glacier-vaults-to-amazon-s3')]" --output text | ForEach-Object { aws dynamodb delete-table --table-name $_ }
+
+
+### Deleting the CloudWatch logs
+For an automated removal of the CloudWatch logs in the stack, it is your responsibility to confirm the logs are not required to keep and to correct stack name is used
+
+List all CloudWatch Log Groups for the stack
+
+    aws logs describe-log-groups --query "logGroups[?contains(logGroupName, 'solution')].logGroupName" --output table
+
+    or
+    an example if using "data-transfer-from-amazon-s3-glacier-vaults-to-amazon-s3" as your deployed name
+
+    aws logs describe-log-groups --query "logGroups[?contains(logGroupName, 'data-transfer-from-amazon-s3-glacier-vaults-to-amazon-s3')].logGroupName" --output table
+
+
+Delete specific log groups (replace with actual names from list above)
+
+    aws logs delete-log-group --log-group-name /aws/lambda/solution-vaults-to-amazon-s3-XXXXX
+
+    or an example
+
+    aws logs delete-log-group --log-group-name /aws/lambda/data-transfer-from-amazon-s3-glacier-vaults-to-amazon-s3-XXXXX
+
+
+
+Delete other CloudWatch logs
+    aws logs delete-log-group --log-group-name /aws/vendedlogs/states/solution-XXXXX
+
+    or an example
+
+    aws logs delete-log-group --log-group-name /aws/vendedlogs/states/  data-transfer-from-amazon-s3-glacier-vaults-to-amazon-s3-XXXXX
+
 
 Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 
 Licensed under the Apache License Version 2.0 (the "License"). You may not use this file except in compliance with the
 License. A copy of the License is located at
 
-    http://www.apache.org/licenses/
+http://www.apache.org/licenses/
 
 or in the "[LICENSE](./LICENSE)" file accompanying this file. This file is distributed on an "AS IS" BASIS, WITHOUT
 WARRANTIES OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing

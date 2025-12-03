@@ -31,6 +31,7 @@ class NestedDistributedMap:
         inner_max_concurrency: Optional[int] = None,
         retry: Optional[List[Dict[str, Any]]] = None,
         max_items_per_batch: Optional[int] = None,
+        execution_type: str = "STANDARD",
     ) -> None:
         inner_item_reader_config = ItemReaderConfig(
             item_reader_resource=f"arn:aws:states:::s3:getObject",
@@ -50,12 +51,14 @@ class NestedDistributedMap:
             },
             result_path="$.map_result",
         )
+        # Create inner distributed map with explicit ExecutionType handling
         inner_distributed_map_state = DistributedMap(
             scope,
             f"{nested_distributed_map_id}InnerDistributedMap",
             definition=definition,
             item_reader_config=inner_item_reader_config,
             result_config=inner_result_config,
+            execution_type="STANDARD",
             max_concurrency=inner_max_concurrency,
             item_selector={
                 **item_selector,
@@ -66,6 +69,8 @@ class NestedDistributedMap:
             retry=retry,
             max_items_per_batch=max_items_per_batch,
         )
+        
+
 
         item_reader_config = ItemReaderConfig(
             item_reader_resource=f"arn:aws:states:::s3:listObjectsV2",
@@ -85,12 +90,14 @@ class NestedDistributedMap:
             result_path="$.map_result",
         )
 
+        # Create outer distributed map with explicit ExecutionType handling
         self.distributed_map_state = DistributedMap(
             scope,
             f"{nested_distributed_map_id}DistributedMap",
             definition=inner_distributed_map_state,
             item_reader_config=item_reader_config,
             result_config=result_config,
+            execution_type="STANDARD",
             max_concurrency=max_concurrency,
             item_selector={
                 **item_selector,
@@ -98,6 +105,8 @@ class NestedDistributedMap:
                 "item.$": "$$.Map.Item.Value",
             },
         )
+        
+
 
     def configure_step_function(
         self,

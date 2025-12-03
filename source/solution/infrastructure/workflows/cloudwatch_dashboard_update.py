@@ -91,7 +91,7 @@ class Workflow:
             "CloudWatchDashboardUpdateStateMachine",
             stack_info.parameters.enable_step_function_logging_parameter.value_as_string,
             stack_info.parameters.enable_step_function_tracing_parameter.value_as_string,
-            definition=get_metrics_from_metric_table.next(put_metrics_to_cw),
+            definition_body=sfn.DefinitionBody.from_chainable(get_metrics_from_metric_table.next(put_metrics_to_cw)),
             state_machine_type=SolutionsStateMachine.EXPRESS,
         )
 

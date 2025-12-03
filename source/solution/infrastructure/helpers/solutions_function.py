@@ -34,7 +34,8 @@ class SolutionsPythonFunction(Function):
         if not kwargs.get("role"):
             kwargs["role"] = self._create_role()
 
-        # set runtime to Python 3.12 unless a runtime is passed
+        # v2.0.0: Enhanced runtime selection with asset bundling support
+        # Set runtime to Python 3.12 unless a runtime is passed
         # GCR and GovCloud regions do not support Python 3.12
         runtime = DEFAULT_RUNTIME
         if is_gov_cn_partition_condition:
@@ -45,9 +46,27 @@ class SolutionsPythonFunction(Function):
             ).to_string()
         if not kwargs.get("runtime"):
             kwargs["runtime"] = Runtime(runtime)
+            
+        # v2.0.0: Use CDK asset bundling instead of pre-built S3 assets
+        if not kwargs.get("code"):
+            from aws_cdk import aws_lambda as lambda_
+            kwargs["code"] = lambda_.Code.from_asset(
+                "source",
+                exclude=[
+                    "**/__pycache__/**",
+                    "tests/**",
+                    "**/node_modules/**",
+                    "cdk.out/**",
+                    ".git/**",
+                    "solution/infrastructure/**",
+                    "solution/pipeline/**"
+                ]
+            )
 
+        # v2.0.0: Enhanced environment variables for asset bundling
         # create default environment variable LOGGING_LEVEL
         kwargs.setdefault("environment", {})["LOGGING_LEVEL"] = str(logging.INFO)
+        kwargs.setdefault("environment", {})["DEPLOYMENT_METHOD"] = "CDK_ASSETS"
 
         # initialize the parent Function
         super().__init__(scope, construct_id, **kwargs)

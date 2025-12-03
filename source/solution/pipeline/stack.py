@@ -63,8 +63,8 @@ class PipelineStack(Stack):
             construct_id,
             stack_name=self.get_resource_name(f"pipeline-stack"),
             env=cdk.Environment(
-                account=os.environ["CDK_DEFAULT_ACCOUNT"],
-                region=os.environ["CDK_DEFAULT_REGION"],
+                account=os.environ.get("CDK_DEFAULT_ACCOUNT"),
+                region=os.environ.get("CDK_DEFAULT_REGION"),
             ),
             description=f"({scope.node.try_get_context('SOLUTION_ID')}-pipeline) - "
             f"{scope.node.try_get_context('SOLUTION_NAME')}: Pipeline Stack to create developer pipeline "
