@@ -427,6 +427,7 @@ class GlueSfnUpdate(object):
                     "--metric_table_name": self.metric_table,
                     "--migration_type.$": "$.migration_type",
                     "--inventory_bucket": self.s3_bucket_name,
+                    "--additional-python-modules": "defusedxml",
                     "--enable-job-insights": "true",
                     "--enable-continuous-cloudwatch-log": "true",
                     "--job-language": "python",
